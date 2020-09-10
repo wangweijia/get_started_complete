@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 'use strict';
+import $ from "jquery";
 
 class Background extends Object {
   constructor() {
