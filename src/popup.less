@@ -1,0 +1,44 @@
+body {
+  width: 500px;
+  height: 100vh;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.listBox {
+  flex: 1;
+  padding: 0 5px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    display: inline;
+  }
+
+  .rowItem {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 44px;
+    
+    padding: 5px 0;
+
+    .timeRow {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin: 5px 0 0 0;
+
+      .icon {
+        width: 24px;
+        height: 24px;
+        margin-left: 10px;
+      }
+    }
+  }
+}
