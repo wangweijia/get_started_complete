@@ -20,19 +20,28 @@ class Component extends Object {
     return $("#tabList");
   }
 
+  // 后期后台对象
+  get bg() {
+    return chrome.extension.getBackgroundPage();
+  }
+
   // 初始化 时间列表
   initData() {
-    this.timeList = {};
+    const obj = this.bg.getCurrentTimes();
+    this.timeList = obj || {};
   }
 
   // 放入时间
   setNewTime(id, date) {
+    console.log(id, date, typeof date, new Date(date).valueOf());
     if (!this.timeList) {
       this.initData();
     }
 
-    const key = `time_${id}`;
-    this.timeList[key] = date;
+    const key = `${id}`;
+    this.timeList[key] = date.valueOf();
+
+    this.bg.updateTimes(this.timeList);
   }
 
   init() {
@@ -61,24 +70,29 @@ class Component extends Object {
       const tempBtn = $(`<div>
        <img class="icon" src="${img}" />
       </div>`);
-      tempBtn.on('click', () => clicked(item));
+      tempBtn.on('click', () => {
+        clicked(item);
+      });
 
       return tempBtn;
     }
 
     const { id } = item;
+    const canelBtn = initBtns('./images/close.png', (item)=>this.cancelTime(item));
+    const commitBtn = initBtns('./images/check.png', (item)=>this.commitTime(item));
+
+    let tempElement = undefined;
+
     if (this.timeList[id]) {
-      const tempElement = $(`<div class="timeRow" >关闭时间：<input id="${id}" type="time" /></div>`)
+      // todo-获取已有 id
+      tempElement = $(`<div  id="div_input_${id}" class="timeRow" >关闭时间：${this.timeList[id]}</div>`);
+      tempElement.append(canelBtn);
+    } else {
+      tempElement = $(`<div id="div_input_${id}" class="timeRow" >
+        关闭时间：<input id="input_${id}" type="datetime-local" />
+      </div>`);
+      tempElement.append(commitBtn);
     }
-    const tempElement = $(`<div class="timeRow" >
-      关闭时间：<input id="input_${id}" type="time" />
-    </div>`);
-
-    const canelBtn = initBtns('./images/close.png', this.cancelTime);
-    const commitBtn = initBtns('./images/check.png', this.commitTime);
-
-    tempElement.append(canelBtn);
-    tempElement.append(commitBtn);
 
     return tempElement;
   }
@@ -89,8 +103,9 @@ class Component extends Object {
     const { id } = item;
     const input = $(`#input_${id}`)[0];
     if (input) {
-      const {valueAsDate} = input;
-      this.setNewTime(id, valueAsDate);
+      window.tttt = input;
+      const {value} = input;
+      this.setNewTime(id, new Date(value));
     }
   }
 
