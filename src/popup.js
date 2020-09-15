@@ -46,9 +46,10 @@ class Component extends Object {
 
   init() {
     chrome.windows.getCurrent({populate: true}, (window) => {
-      console.log(window);
       const { tabs=[] } = window;
+      this.tabListDiv.empty();
       
+      console.log('------------init');
       tabs.forEach((item) => {
         const row = this.initRowByItem(item);
         this.tabListDiv.append(row);
@@ -59,7 +60,8 @@ class Component extends Object {
   // 初始化 行
   initRowByItem(item) {
     const { title, url } = item;
-    const tempItem = $(`<div class="rowItem" ><div>${title}</div></div>`);
+    const tempItem = $(`<div class="rowItem" ></div>`);
+    tempItem.text(title)
     tempItem.append(this.initTimeInput(item));
     return tempItem;
   }
@@ -78,6 +80,7 @@ class Component extends Object {
     }
 
     const { id } = item;
+    console.log('id:', id);
     const canelBtn = initBtns('./images/close.png', (item)=>this.cancelTime(item));
     const commitBtn = initBtns('./images/check.png', (item)=>this.commitTime(item));
 
@@ -88,9 +91,17 @@ class Component extends Object {
       tempElement = $(`<div  id="div_input_${id}" class="timeRow" >关闭时间：${this.timeList[id]}</div>`);
       tempElement.append(canelBtn);
     } else {
-      tempElement = $(`<div id="div_input_${id}" class="timeRow" >
-        关闭时间：<input id="input_${id}" type="datetime-local" />
-      </div>`);
+      const aId = `input_${id}`;
+      const input = $(`<input id="${aId}" type="datetime-local" />`);
+      input.on('change', (e) => {
+        console.log(e);
+        $(`#${aId}`).attr({value: e.target.value});
+
+        console.log( $(`#${aId}`)[0]);
+      })
+
+      tempElement = $(`<div id="div_input_${aId}" class="timeRow" >关闭时间：</div>`);
+      tempElement.append(input);
       tempElement.append(commitBtn);
     }
 
@@ -99,13 +110,13 @@ class Component extends Object {
 
   // 提交时间
   commitTime(item) {
-    console.log('commitTime', item);
     const { id } = item;
     const input = $(`#input_${id}`)[0];
     if (input) {
-      window.tttt = input;
       const {value} = input;
       this.setNewTime(id, new Date(value));
+      
+      this.init();
     }
   }
 
