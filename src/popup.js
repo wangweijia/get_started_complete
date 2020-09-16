@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 'use strict';
+import moment from 'moment';
 import $ from "jquery";
 import "./popup.less";
 
@@ -17,7 +18,10 @@ class Component extends Object {
 
   // 列表-root
   get tabListDiv() {
-    return $("#tabList");
+    if (!this.__tabList) {
+      this.__tabList = $("#tabList");
+    }
+    return this.__tabList;
   }
 
   // 后期后台对象
@@ -39,7 +43,11 @@ class Component extends Object {
     }
 
     const key = `${id}`;
-    this.timeList[key] = date.valueOf();
+    if (date) {
+      this.timeList[key] = date.valueOf();
+    } else {
+      delete this.timeList[key];
+    }
 
     this.bg.updateTimes(this.timeList);
   }
@@ -49,12 +57,16 @@ class Component extends Object {
       const { tabs=[] } = window;
       this.tabListDiv.empty();
       
-      console.log('------------init');
-      tabs.forEach((item) => {
+      // tabs.forEach((item) => {
+      //   const row = this.initRowByItem(item);
+      //   this.tabListDiv.append(row);
+      // });
+      for (let index = 0; index < tabs.length; index++) {
+        const item = tabs[index];
         const row = this.initRowByItem(item);
         this.tabListDiv.append(row);
-      })
-    })
+      }
+    });
   }
 
   // 初始化 行
@@ -88,16 +100,14 @@ class Component extends Object {
 
     if (this.timeList[id]) {
       // todo-获取已有 id
-      tempElement = $(`<div  id="div_input_${id}" class="timeRow" >关闭时间：${this.timeList[id]}</div>`);
+      const tl = this.timeList[id] || 0;
+      tempElement = $(`<div  id="div_input_${id}" class="timeRow" >关闭时间：${moment(tl).format('YYYY-MM-DD HH:mm')}</div>`);
       tempElement.append(canelBtn);
     } else {
       const aId = `input_${id}`;
       const input = $(`<input id="${aId}" type="datetime-local" />`);
       input.on('change', (e) => {
-        console.log(e);
         $(`#${aId}`).attr({value: e.target.value});
-
-        console.log( $(`#${aId}`)[0]);
       })
 
       tempElement = $(`<div id="div_input_${aId}" class="timeRow" >关闭时间：</div>`);
@@ -122,7 +132,9 @@ class Component extends Object {
 
   // 取消时间
   cancelTime(item) {
-    console.log('cancelTime', item);
+    const { id } = item;
+    this.setNewTime(id, undefined);      
+    this.init();
   }
 }
 
